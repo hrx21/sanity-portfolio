@@ -1,5 +1,5 @@
-import { createClient } from "next-sanity";
-import PortableText from "react-portable-text"
+import { createClient } from 'next-sanity';
+import PortableText from 'react-portable-text';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
@@ -20,20 +20,28 @@ import git from '../public/images/git.png';
 import bootstrap from '../public/images/bootstrap.png';
 import sadhana from '../public/images/sadhana.png';
 import app from '../public/images/app.png';
-// import IndividualIntervalsExample from './carousel';
-// import TransitionsModal from './mui-modal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dev from '../public/images/dev.webp';
-// import { Carousel } from 'react-responsive-carousel';
-// import 'react-responsive-carousel/lib/styles/carousel.min.css'; // requi
+import imageUrlBuilder from '@sanity/image-url';
+import Link from 'next/link';
 
-export default function Home({blogs}) {
+export default function Home({ blogs }) {
   const [darkMode, setDarkMode] = useState(false);
-  const [resModal, setResModal] = useState(false);
   const openInNewTab = (url) => {
     window.open(url);
   };
+  const client = createClient({
+    projectId: '2r10b4al',
+    dataset: 'production',
+    useCdn: false,
+  });
 
+  const builder = imageUrlBuilder(client);
+  // useEffect(() => {
+  //   console.log(builder.image(item.blogimage).width(200).url());
+  //   console.log(builder.image(blogs[1].blogimage).width(200).url());
+  //   console.log(builder.image(blogs[2].blogimage).width(200).url());
+  // }, []);
   return (
     <>
       <div className={darkMode ? 'dark' : ' '}>
@@ -50,7 +58,6 @@ export default function Home({blogs}) {
                 </li>
                 <li>
                   <a
-                    onClick={() => setResModal(true)}
                     className="bg-gradient-to-r from-cyan-400 to-teal-500 text-white px-4 py-2 rounded-md ml-8"
                     href="#"
                   >
@@ -78,7 +85,7 @@ export default function Home({blogs}) {
               <YouTubeIcon className="cursor-pointer" />
             </div>
             <div className="relative bg-gradient-to-b from-teal-500 rounded-full w-96 h-96 mt-20 mx-auto overflow-hidden md:h-96 md:w-96">
-              <Image layout="fill" objectFit="cover" src={dev} />
+              <Image src={dev} />
             </div>
           </section>
           <section>
@@ -90,11 +97,6 @@ export default function Home({blogs}) {
                 <span className="text-teal-500"> startups </span>
                 I've also collaborated with talented people to create digital
                 products for both business and consumer use.
-              </p>
-              <p>
-                {/* Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic
-                ducimus tempora, non veniam quae explicabo beatae iure. Adipisci
-                voluptatem possimus accusamus perspiciatis. */}
               </p>
             </div>
             <div>
@@ -133,15 +135,37 @@ export default function Home({blogs}) {
                   <Image src={mui} width={100} height={100} />
                 </div>
               </div>
-              {/* <div className='flex items-center justify-center flex-col shadow-xl p-10 rounded-xl my-10'>
-                <Image src={design} width={100} height={100} />
-                <h3 className='text-lg font-medium pt-8 pb-2'>Beautiful Designs</h3>
-                <p className='py-2'>Creating Elegant designs suited for your needs.</p>
-                <h4 className='text-teal-500 py-4'>Design Tools I use.</h4>
-              </div> */}
             </div>
           </section>
-
+          <div className="flex flex-1 justify-center flex-col items-center py-10">
+            <h3 className="text-gray-700 text-4xl my-5">I ALSO WRITE</h3>
+            <p className="text-2xl text-gray-600">Read my Blogs!</p>
+          </div>
+          <div className="w-full grid grid-cols-3 gap-5 hover:text-yellow-50">
+            {blogs.map((item) => {
+              return (
+                <Link key={item.slug} href={'/blog/' + item.slug.current}>
+                  <div
+                    style={{
+                      backgroundImage: `url(${builder
+                        .image(item.blogimage)
+                        .width()
+                        .url()})`,
+                    }}
+                    className="bg-cover h-80 bg-center bg-no-repeat hover:text-blue-400"
+                  ></div>
+                  <div className="text-gray-500 text-center py-3 px-5">
+                    <span className="font-body text-lg font-semibold dark:text-gray-500 text-black">
+                      {item.title}
+                    </span>
+                    <span className="pt-2 font-body text-gray-200">
+                      {item.metadesc}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
           <div className="dark:text-gray-500">
             <h3 className="dark:text-gray-500 text-2xl font-semibold text-black mb-10">
               Projects I have worked on
@@ -180,20 +204,20 @@ export default function Home({blogs}) {
          />
       </div> */}
     </>
-  )
+  );
 }
 
-export async function getServerSideProps(context){
+export async function getServerSideProps(context) {
   const client = createClient({
     projectId: '2r10b4al',
     dataset: 'production',
     useCdn: false,
-  })
-  const query = `*[_type == "blog"]`
-  const blogs = await client.fetch(query)
-  return{
-    props:{
-      blogs
-    }
-  }
+  });
+  const query = `*[_type == "blog"]`;
+  const blogs = await client.fetch(query);
+  return {
+    props: {
+      blogs,
+    },
+  };
 }
